@@ -1,7 +1,6 @@
-pMrAIC
+pMrAIC - Parallel MrAIC
 ======
 
-Parallel MrAIC
 
 NAME
 
