@@ -1,23 +1,34 @@
 pMrAIC
 ======
 
-Parallel MrAICNAME
+Parallel MrAIC
+
+NAME
+
     pmraic.pl
 
+
 VERSION
+
     Documentation for pmraic.pl version 1.1
 
+
 SYNOPSIS
+
     pmraic.pl [options] FILE
 
+
 DESCRIPTION
+
     Script for running nucleotide substitutions using PHYML (Guindon &
     Gasquel, 2003) in parallel. It will report the best AIC, AICc, BIC
     model(s), along with the best ML tree under that/those models, and also
     the syntax for specifying the model(s) in MrBayes v.3 (Ronquist &
     Huelsenbeck, 2003).
 
+
 OPTIONS
+
     Mandatory arguments to long options are mandatory for short options too
 
     -b, --bash=*number*
@@ -93,7 +104,9 @@ OPTIONS
     -man, --man
             Displays the manual page
 
+
 USAGE
+
     Examples:
 
     Run PHYML in parallel. Default is to start as many different runs as
@@ -129,15 +142,20 @@ USAGE
 
         pmraic.pl --summarize data.dat
 
+
 AUTHOR
+
     Written by Johan A. A. Nylander
 
-REPORTING BUGS
-    See DEPENDENCIES below.
 
+REPORTING BUGS
+
+    See DEPENDENCIES below.
     Please report any further bugs to *jnylander @ users.sourceforge.net*.
 
+
 DEPENDENCIES
+
     Needs PhyML v. > 3.0 to run. Note that current precompiled versions of
     PhyML ("v3.0_360-500M") available from
     http://www.atgc-montpellier.fr/phyml/ contains a bug preventing "I"
@@ -157,8 +175,10 @@ DEPENDENCIES
 
       sudo perl -MCPAN -e 'install Parallel::ForkManager'
 
+
 LICENSE AND COPYRIGHT
-    Copyright (c) 2009,2010,2011 Johan Nylander. All rights reserved.
+
+    Copyright (c) 2009,2010,2011,2012,2013 Johan Nylander. All rights reserved.
 
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the
@@ -170,6 +190,8 @@ LICENSE AND COPYRIGHT
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
     Public License for more details. http://www.gnu.org/copyleft/gpl.html
 
+
 DOWNLOAD
+
     https://github.com/nylander/pMrAIC
 
