@@ -75,7 +75,6 @@ my @mrmodeltest_models = qw(F81 F81G F81I F81IG GTR GTRG GTRI GTRIG HKY85 HKY85G
 my $models             = q{};
 my $modeltest          = 0; # Use the 24 MrBayes models by default
 
-
 my $bash               = 0;
 my $maui               = 0;
 #my $sequential         = q{};
@@ -139,7 +138,7 @@ my $phyml_tree_ending  = '_phyml_tree.txt'; # check mac/win/linux names!
 #===============================================================================
 sub calculate_aic {
 
-	my ($model) = @_;
+    my ($model) = @_;
 
     my $df = ($use_brlens) ? 'df' : 'dfnb'; # which df to use, with or without brlens
 
@@ -162,12 +161,12 @@ sub calculate_aic {
 #===============================================================================
 sub calculate_aicc {
 
-	my ($model) = @_;
+    my ($model) = @_;
 
     my $nchar = $dimensions[1];
     my $df    = ($use_brlens) ? 'df' : 'dfnb'; # which df to use, with or without brlens
 
-	my $aicc = (((-2.0)*($run_HoH{$model}->{'lnl'})) + (2.0*($run_HoH{$model}->{$df})) + ((2.0*($run_HoH{$model}->{$df})*(($run_HoH{$model}->{$df})+1.0))/($nchar-($run_HoH{$model}->{$df})-1.0)));
+    my $aicc = (((-2.0)*($run_HoH{$model}->{'lnl'})) + (2.0*($run_HoH{$model}->{$df})) + ((2.0*($run_HoH{$model}->{$df})*(($run_HoH{$model}->{$df})+1.0))/($nchar-($run_HoH{$model}->{$df})-1.0)));
 
     return($aicc);
 
@@ -186,12 +185,12 @@ sub calculate_aicc {
 #===============================================================================
 sub calculate_bic {
 
-	my ($model) = @_;
+    my ($model) = @_;
 
     my $nchar = $dimensions[1];
     my $df    = ($use_brlens) ? 'df' : 'dfnb'; # which df to use, with or without brlens
 
-	my $bic = (((-2.0)*($run_HoH{$model}->{'lnl'})) + ((log($nchar)) * ($run_HoH{$model}->{$df})));
+    my $bic = (((-2.0)*($run_HoH{$model}->{'lnl'})) + ((log($nchar)) * ($run_HoH{$model}->{$df})));
 
     return($bic);
 
@@ -208,13 +207,13 @@ sub calculate_bic {
 #===============================================================================
 sub calculate_aic_weights {
 
-	my $sumAICExp = 0.0;
+    my $sumAICExp = 0.0;
     my $AIC_min_model = get_min_aic_model();
     my $AIC_min = $run_HoH{$AIC_min_model}->{'aic'};
 
     foreach my $model (keys %run_HoH) {
         $run_HoH{$model}->{'delta_aic'} = $run_HoH{$model}->{'aic'} - $AIC_min;
-		$sumAICExp += exp((-0.5) * ($run_HoH{$model}->{'delta_aic'}));
+        $sumAICExp += exp((-0.5) * ($run_HoH{$model}->{'delta_aic'}));
     }
     foreach my $model (keys %run_HoH) {
         $run_HoH{$model}->{'aic_weight'} = exp((-0.5) * ($run_HoH{$model}->{'delta_aic'})) / $sumAICExp ;
@@ -234,13 +233,13 @@ sub calculate_aic_weights {
 #===============================================================================
 sub calculate_aicc_weights {
 
-	my $sumAICcExp = 0.0;
+    my $sumAICcExp = 0.0;
     my $AICc_min_model = get_min_aicc_model();
     my $AICc_min = $run_HoH{$AICc_min_model}->{'aicc'};
 
     foreach my $model (keys %run_HoH) {
         $run_HoH{$model}->{'delta_aicc'} = $run_HoH{$model}->{'aicc'} - $AICc_min;
-		$sumAICcExp += exp((-0.5) * ($run_HoH{$model}->{'delta_aicc'}));
+        $sumAICcExp += exp((-0.5) * ($run_HoH{$model}->{'delta_aicc'}));
     }
 
     foreach my $model (keys %run_HoH) {
@@ -260,13 +259,13 @@ sub calculate_aicc_weights {
 #===============================================================================
 sub calculate_bic_weights {
 
-	my $sumBICExp = 0.0;
+    my $sumBICExp = 0.0;
     my $BIC_min_model = get_min_bic_model();
     my $BIC_min = $run_HoH{$BIC_min_model}->{'bic'};
 
     foreach my $model (keys %run_HoH) {
         $run_HoH{$model}->{'delta_bic'} = $run_HoH{$model}->{'bic'} - $BIC_min;
-		$sumBICExp += exp((-0.5) * ($run_HoH{$model}->{'delta_bic'}));
+        $sumBICExp += exp((-0.5) * ($run_HoH{$model}->{'delta_bic'}));
     }
     foreach my $model (keys %run_HoH) {
         $run_HoH{$model}->{'bic_weight'} = exp((-0.5) * ($run_HoH{$model}->{'delta_bic'})) / $sumBICExp ;
@@ -313,6 +312,43 @@ sub check_models_arg {
 
 } # end of check_models_arg
 
+#
+#===  FUNCTION  ================================================================
+#         NAME:  check_models
+#      VERSION:  12/08/2009 09:27:05 AM CET
+#  DESCRIPTION:  Checks the models against the keys in 
+#                the HoH hash 
+#                Lookup code from Perl Cookbook.
+#   PARAMETERS:  An array
+#      RETURNS:  array of correct models
+#         TODO:  ???
+#===============================================================================
+sub check_models {
+
+    my (@mods) = @_;
+
+    my @keys = keys %HoH;
+
+    my %seen;      # lookup table
+    my @mods_only; # answer
+
+    @seen{@keys} = (); # build lookup table
+
+    foreach my $mod (@mods) {
+        $mod = uc($mod);
+        push(@mods_only, $mod) unless exists $seen{$mod};
+    }
+
+    if (scalar(@mods_only) > 0) {
+        print STDERR  "Wrong model syntax: @mods_only\n";
+        print STDERR  "Use \'$0 --help\' to see the valid choices.\n";
+        exit(0);
+    }
+    else {
+        return(@mods);
+    }
+
+} # end of check_models
 
 #===  FUNCTION  ================================================================
 #         NAME:  check_optimize_arg
@@ -320,13 +356,13 @@ sub check_models_arg {
 #  DESCRIPTION: Check optimize argument given to pMrAIC
 #               from PHYML manual:
 #               -o params
-#		          This option focuses on specific parameter optimisation.
-#		          params=tlr : tree topology (t), branch length (l) and rate parameters (r) are optimised.
-#		          params=tl  : tree topology and branch length are optimised.
-#		          params=lr  : branch length and rate parameters are optimised.
-#		          params=l   : branch length are optimised.
-#		          params=r   : rate parameters are optimised.
-#		          params=n   : no parameter is optimised.
+#                  This option focuses on specific parameter optimisation.
+#                  params=tlr : tree topology (t), branch length (l) and rate parameters (r) are optimised.
+#                  params=tl  : tree topology and branch length are optimised.
+#                  params=lr  : branch length and rate parameters are optimised.
+#                  params=l   : branch length are optimised.
+#                  params=r   : rate parameters are optimised.
+#                  params=n   : no parameter is optimised.
 #
 #   PARAMETERS:  $optimize_arg, string
 #      RETURNS:  $optimize_arg, string
@@ -403,10 +439,10 @@ sub check_processors {
 #         NAME:  check_search_arg
 #      VERSION:  11/28/2009 09:22:23 PM CET
 #  DESCRIPTION:  Check search argument for phyml. From the phyml manual:
-#               	-s (or --search) move
-#	            	Tree topology search operation option.
-#	            	Can be either NNI (default, fast) or SPR (a bit slower than NNI)
-#	            	or BEST (best of NNI and SPR search).
+#                   -s (or --search) move
+#                    Tree topology search operation option.
+#                    Can be either NNI (default, fast) or SPR (a bit slower than NNI)
+#                    or BEST (best of NNI and SPR search).
 #   PARAMETERS:  $search_arg, string
 #      RETURNS:  $search_arg
 #         TODO:  ???
@@ -724,25 +760,25 @@ sub get_dimensions {
 
     my @dimensions = ();
 
-	open my $INFILE, "<", $file or die "\a\nERROR!\n\nCannot open $file for reading: $!";
-	chomp (my $firstline = <$INFILE>);
-	close($INFILE);
+    open my $INFILE, "<", $file or die "\a\nERROR!\n\nCannot open $file for reading: $!";
+    chomp (my $firstline = <$INFILE>);
+    close($INFILE);
 
-	$_ = $firstline;
+    $_ = $firstline;
 
-	if (/\s*(\d+)\s+(\d+)/) {
-		my $ntax = $1;
+    if (/\s*(\d+)\s+(\d+)/) {
+        my $ntax = $1;
         push @dimensions, $ntax;
-		my $nchar = $2;
+        my $nchar = $2;
         push @dimensions, $nchar;
-		my $nbranch = ((2*$ntax)-3);
+        my $nbranch = ((2*$ntax)-3);
         push @dimensions, $nbranch;
-		my $maxNumParameters = $nbranch + 10;	# Number of branches plus parameters in GTR+I+G
+        my $maxNumParameters = $nbranch + 10;    # Number of branches plus parameters in GTR+I+G
         push @dimensions, $maxNumParameters;
-	}
-	else {
-		die "\a\nERROR!\n\nCould not read number of taxa and/or characters\n\n"
-	}
+    }
+    else {
+        die "\a\nERROR!\n\nCould not read number of taxa and/or characters\n\n"
+    }
 
     return(@dimensions); 
 
@@ -850,21 +886,21 @@ sub get_min_bic_model {
 sub initialize_HoH {
 
     ## MB commands
-	my $equal      = "rates=equal";
-	my $propinv    = "rates=propinv";
-	my $gamma      = "rates=gamma";
-	my $invgamma   = "rates=invgamma";
-	my $Prset      = "Prset applyto=(1)";
-	my $Lset       = "Lset applyto=(1)";
-	my $nst1       = "nst=1";
-	my $nst2       = "nst=2";
-	my $nst6       = "nst=6";
-	my $shapepr    = "shapepr=Uniform(0.1,50.0)";
-	my $pinvarpr   = "pinvarpr=Uniform(0.0,1.0)";
-	my $eqfreqpr   = "statefreqpr=Fixed(Equal)";
-	my $uneqfreqpr = "statefreqpr=Dirichlet(1.0,1.0,1.0,1.0)";
-	my $revmatpr   = "revmatpr=Dirichlet(1.0,1.0,1.0,1.0,1.0,1.0)";
-	my $tratiopr   = "tratiopr=Beta(1.0,1.0)";
+    my $equal      = "rates=equal";
+    my $propinv    = "rates=propinv";
+    my $gamma      = "rates=gamma";
+    my $invgamma   = "rates=invgamma";
+    my $Prset      = "Prset applyto=(1)";
+    my $Lset       = "Lset applyto=(1)";
+    my $nst1       = "nst=1";
+    my $nst2       = "nst=2";
+    my $nst6       = "nst=6";
+    my $shapepr    = "shapepr=Uniform(0.1,50.0)";
+    my $pinvarpr   = "pinvarpr=Uniform(0.0,1.0)";
+    my $eqfreqpr   = "statefreqpr=Fixed(Equal)";
+    my $uneqfreqpr = "statefreqpr=Dirichlet(1.0,1.0,1.0,1.0)";
+    my $revmatpr   = "revmatpr=Dirichlet(1.0,1.0,1.0,1.0,1.0,1.0)";
+    my $tratiopr   = "tratiopr=Beta(1.0,1.0)";
 
     ## PHYML commands
     my $pinv_e     = '--pinv e';
@@ -892,105 +928,105 @@ sub initialize_HoH {
         df => 0 + $nbranch,
         dfnb => 0,
     };
-	$HoH{'JC69I'}  = {
+    $HoH{'JC69I'}  = {
         name  => 'JC69I',
         mbcmd => " $Lset $nst1 $propinv;\n $Prset $eqfreqpr $pinvarpr",
         phymlcmd => " JC69 $nclasses_1 $pinv_e ",
         df => 1 + $nbranch,
         dfnb => 1,
     };
-	$HoH{'JC69G'}  = {
+    $HoH{'JC69G'}  = {
         name => 'JC69G',
         mbcmd => " $Lset $nst1 $gamma;\n $Prset $eqfreqpr $shapepr;",
         phymlcmd => " JC69 $nclasses_4 $alpha_e ",
         df => 1 + $nbranch,
         dfnb => 1,
     };
-	$HoH{'JC69IG'} = {
+    $HoH{'JC69IG'} = {
         name => 'JC69IG',
         mbcmd => " $Lset $nst1 $invgamma;\n $Prset $eqfreqpr $shapepr $pinvarpr;",
         phymlcmd => " JC69  $pinv_e $nclasses_4 $alpha_e ",
         df => 2 + $nbranch,
         dfnb => 2,
     };
-	$HoH{'F81'}    = {
+    $HoH{'F81'}    = {
         name => 'F81',
         mbcmd => " $Lset $nst1 $equal;\n $Prset $uneqfreqpr;",
         phymlcmd => " F81 $f_m $nclasses_1 ",
         df => 3 + $nbranch,
         dfnb => 3,
     };
-	$HoH{'F81I'}   = {
+    $HoH{'F81I'}   = {
         name => 'F81I',
         mbcmd => " $Lset $nst1 $propinv;\n $Prset $uneqfreqpr $pinvarpr;",
         phymlcmd => " F81 $f_m $nclasses_1 $pinv_e ",
         df => 4 + $nbranch,
         dfnb => 4,
     };
-	$HoH{'F81G'}   = {
+    $HoH{'F81G'}   = {
         name => 'F81G',
         mbcmd => " $Lset $nst1 $gamma;\n $Prset $uneqfreqpr $shapepr;",
         phymlcmd => " F81 $f_m $nclasses_4 $alpha_e ",
         df => 4 + $nbranch,
         dfnb => 4,
     };
-	$HoH{'F81IG'}  = {
+    $HoH{'F81IG'}  = {
         name => 'F81IG',
         mbcmd => " $Lset $nst1 $invgamma;\n $Prset $uneqfreqpr $shapepr $pinvarpr;",
         phymlcmd => " F81 $f_m $pinv_e $nclasses_4 $alpha_e ",
         df => 5 + $nbranch,
         dfnb => 5,
     };
-	$HoH{'K2P'}    = {
+    $HoH{'K2P'}    = {
         name => 'K2P',
         mbcmd => " $Lset $nst2 $equal;\n $Prset $eqfreqpr $tratiopr;",
         phymlcmd => " K80 $ts_tv_e $nclasses_1 ",
         df => 1 + $nbranch,
         dfnb => 1,
     };
-	$HoH{'K2PI'}   = {
+    $HoH{'K2PI'}   = {
         name => 'K2PI',
         mbcmd => " $Lset $nst2 $propinv;\n $Prset $eqfreqpr $tratiopr $pinvarpr;",
         phymlcmd => " K80 $ts_tv_e $nclasses_1 $pinv_e ",
         df => 2 + $nbranch,
         dfnb => 2,
     };
-	$HoH{'K2PG'}   = {
+    $HoH{'K2PG'}   = {
         name => 'K2PG',
         mbcmd => " $Lset $nst2 $gamma;\n $Prset $eqfreqpr $tratiopr $shapepr;",
         phymlcmd => " K80 $ts_tv_e $nclasses_4 $alpha_e ",
         df => 2 + $nbranch,
         dfnb => 2,
     };
-	$HoH{'K2PIG'}  = {
+    $HoH{'K2PIG'}  = {
         name => 'K2PIG',
         mbcmd => " $Lset $nst2 $invgamma;\n $Prset $eqfreqpr $tratiopr $shapepr $pinvarpr;",
         phymlcmd => " K80 $ts_tv_e $pinv_e $nclasses_4 $alpha_e ",
         df => 3 + $nbranch,
         dfnb => 3,
     };
-	$HoH{'HKY85'}    = {
+    $HoH{'HKY85'}    = {
         name => 'HKY85',
         mbcmd => " $Lset $nst2 $equal;\n $Prset $uneqfreqpr $tratiopr;",
         phymlcmd => " HKY85 $f_m $ts_tv_e $nclasses_1 ",
         df => 4 + $nbranch,
         dfnb => 4,
     };
-	$HoH{'HKY85I'}   = {
+    $HoH{'HKY85I'}   = {
         name => 'HKY85I',
         mbcmd => " $Lset $nst2 $propinv;\n $Prset $uneqfreqpr $tratiopr $pinvarpr;",
         phymlcmd => " HKY85 $f_m $ts_tv_e $pinv_e $nclasses_1 ",
         df => 4 + $nbranch,
         dfnb => 4,
     };
-	$HoH{'HKY85G'}   = {
+    $HoH{'HKY85G'}   = {
         name => 'HKY85G',
         mbcmd => " $Lset $nst2 $gamma;\n $Prset $uneqfreqpr $tratiopr $shapepr;",
         phymlcmd => " HKY85 $f_m $ts_tv_e $nclasses_4 $alpha_e ",
         df => 5 + $nbranch,
         dfnb => 5,
     };
-	$HoH{'HKY85IG'}  = {
+    $HoH{'HKY85IG'}  = {
         name => 'HKY85IG',
         mbcmd => " $Lset $nst2 $invgamma;\n $Prset $uneqfreqpr $tratiopr $shapepr $pinvarpr;",
         phymlcmd => " HKY85 $f_m $ts_tv_e $pinv_e $nclasses_4 $alpha_e ",
@@ -1256,56 +1292,56 @@ sub initialize_HoH {
     };
     #
     ###################################### End Modeltest extra models ############################################
-	$HoH{'SYM'}    = {
+    $HoH{'SYM'}    = {
         name => 'SYM',
         mbcmd => " $Lset $nst6 $equal;\n $Prset $revmatpr $eqfreqpr;",
         phymlcmd => " $custom_sym $f_equal $nclasses_1 ",
         df => 5 + $nbranch,
         dfnb => 5,
     };
-	$HoH{'SYMI'}   = {
+    $HoH{'SYMI'}   = {
         name => 'SYMI',
         mbcmd => " $Lset $nst6 $propinv;\n $Prset $revmatpr $eqfreqpr $pinvarpr;",
         phymlcmd => " $custom_sym $f_equal $pinv_e $nclasses_1 ",
         df => 6 + $nbranch,
         dfnb => 6,
     };
-	$HoH{'SYMG'}   = {
+    $HoH{'SYMG'}   = {
         name => 'SYMG',
         mbcmd => " $Lset $nst6 $gamma;\n $Prset $revmatpr $eqfreqpr;",
         phymlcmd => " $custom_sym $f_equal $nclasses_4 $alpha_e ",
         df => 6 + $nbranch,
         dfnb => 6,
     };
-	$HoH{'SYMIG'}  = {
+    $HoH{'SYMIG'}  = {
         name => 'SYMIG',
         mbcmd => " $Lset $nst6 $invgamma;\n $Prset $revmatpr $eqfreqpr $shapepr $pinvarpr;",
         phymlcmd => " $custom_sym $f_equal $pinv_e $nclasses_4 $alpha_e ",
         df => 7 + $nbranch,
         dfnb => 7,
     };
-	$HoH{'GTR'}    = {
+    $HoH{'GTR'}    = {
         name => 'GTR',
         mbcmd => " $Lset $nst6 $equal;\n $Prset $revmatpr $uneqfreqpr;",
         phymlcmd => " GTR $f_m $nclasses_1 ",
         df => 8 + $nbranch,
         dfnb => 8,
     };
-	$HoH{'GTRI'}   = {
+    $HoH{'GTRI'}   = {
         name => 'GTRI',
         mbcmd => " $Lset $nst6 $propinv;\n $Prset $revmatpr $uneqfreqpr $pinvarpr;",
         phymlcmd => " GTR $f_m $pinv_e $nclasses_1 ",
         df => 9 + $nbranch,
         dfnb => 9,
     };
-	$HoH{'GTRG'}	 = {
+    $HoH{'GTRG'}     = {
         name => 'GTRG',
         mbcmd => " $Lset $nst6 $gamma;\n $Prset $revmatpr $uneqfreqpr $shapepr;",
         phymlcmd => " GTR $f_m $nclasses_4 $alpha_e ",
         df => 9 + $nbranch,
         dfnb => 9,
     };
-	$HoH{'GTRIG'}  = {
+    $HoH{'GTRIG'}  = {
         name => 'GTRIG',
         mbcmd => " $Lset $nst6 $invgamma;\n $Prset $revmatpr $uneqfreqpr $shapepr $pinvarpr;",
         phymlcmd => " GTR $f_m $pinv_e $nclasses_4 $alpha_e ",
@@ -1382,7 +1418,7 @@ sub pmraic_print {
 
     ## Set output filename
     my $pMrAIC_output = $infile . $output_file_suffix;
-	open my $OUT, '>', $pMrAIC_output or die "\a\nERROR!\n\nCould not create output file $!\n";
+    open my $OUT, '>', $pMrAIC_output or die "\a\nERROR!\n\nCould not create output file $!\n";
 
     ## Get the date
     my $datestring = prettydate();
@@ -1432,20 +1468,20 @@ sub pmraic_print {
 
         ## See if the number of parameters are small compared to sample size
         #if($changedNparams eq TRUE) {
-		#	$estMinBASize = ($BAratio * $maxNumParametersBrLens);
-		#	$estMinSize = ($maxNumParametersBrLens);
-		#	printf  $OUT "\n\nWARNING:\n";
-		#	printf  $OUT "Number of parameters is larger than the sample size!\n";
-		#	printf  $OUT "This causes problems in AICc calculations and you need to get\n";
-		#	printf  $OUT "more sequence data!\n";
-		#	printf  $OUT "\t(For %g terminal branches you probably need more\n", $ntax;
-		#	printf  $OUT "\tthan %g characters, and an approx. data size for\n", $estMinSize;
-		#	printf  $OUT "\thaving a nchar/nparam ratio over %g is about %g bp.)\n", $BAratio, $estMinBASize;
-		#	printf  $OUT "Calculations were done anyway while not considering branch\n";
-		#	printf  $OUT "lengths in the total number of parameters. Number of\n";
-		#	printf  $OUT "parameters was set to $maxNumParameters (number of free parameters\n";
-		#	printf  $OUT "in the GTR+I+G model).\n\n";
-		#}
+        #    $estMinBASize = ($BAratio * $maxNumParametersBrLens);
+        #    $estMinSize = ($maxNumParametersBrLens);
+        #    printf  $OUT "\n\nWARNING:\n";
+        #    printf  $OUT "Number of parameters is larger than the sample size!\n";
+        #    printf  $OUT "This causes problems in AICc calculations and you need to get\n";
+        #    printf  $OUT "more sequence data!\n";
+        #    printf  $OUT "\t(For %g terminal branches you probably need more\n", $ntax;
+        #    printf  $OUT "\tthan %g characters, and an approx. data size for\n", $estMinSize;
+        #    printf  $OUT "\thaving a nchar/nparam ratio over %g is about %g bp.)\n", $BAratio, $estMinBASize;
+        #    printf  $OUT "Calculations were done anyway while not considering branch\n";
+        #    printf  $OUT "lengths in the total number of parameters. Number of\n";
+        #    printf  $OUT "parameters was set to $maxNumParameters (number of free parameters\n";
+        #    printf  $OUT "in the GTR+I+G model).\n\n";
+        #}
 
         ## Output sorted by AICc
         #elsif (($nchar/$maxNumParameters) < $BAratio) { # Esentially testing if nchar < 400
@@ -1458,31 +1494,38 @@ sub pmraic_print {
         printf  $OUT "\n\nModel\tdf\tlnL\tAICc\twAICc\tcwAICc";
         foreach my $model (sort { $run_HoH{$a}->{'aicc'} <=> $run_HoH{$b}->{'aicc'} } keys %run_HoH) {
             $cumAICcWeight += $run_HoH{$model}->{'aicc_weight'};
-            printf $OUT "\n%s\t%g\t%.4f\t%.4f\t%.4f\t%.4f", $run_HoH{$model}->{'name'}, $run_HoH{$model}->{$df}, $run_HoH{$model}->{'lnl'}, $run_HoH{$model}->{'aicc'}, $run_HoH{$model}->{'aicc_weight'}, $cumAICcWeight;
+            print $model, "\n";
+            print $df, "\n";
+            print $run_HoH{$model}->{$df}, "\n";
+            print $run_HoH{$model}->{'df'}, "\n";
+            print $run_HoH{$model}->{'dfnb'}, "\n";
+            warn "\n HERE (hit return to continue)\n" and getc();
+
+            printf $OUT "\n%s\t%g\t%.4f\t%.4f\t%.4f\t%.4f", $run_HoH{$model}->{'name'}, $run_HoH{$model}->{$df}, $run_HoH{$model}->{'lnl'}, $run_HoH{$model}->{'aicc'}, $run_HoH{$model}->{'aicc_weight'}, $cumAICcWeight; # JN: Missing value here 
         }
         print  $OUT "\n\n";
         #}
 
         ## Output sorted by AIC
-		my $cumAICWeight = 0.0;
-		printf  $OUT "\n\n(Output sorted by AIC. w: Akaike weight, cw: cumulative w.)";
-		printf  $OUT "\n\nModel\tdf\tlnL\tAIC\twAIC\tcwAIC";
+        my $cumAICWeight = 0.0;
+        printf  $OUT "\n\n(Output sorted by AIC. w: Akaike weight, cw: cumulative w.)";
+        printf  $OUT "\n\nModel\tdf\tlnL\tAIC\twAIC\tcwAIC";
         foreach my $model (sort { $run_HoH{$a}->{'aic'} <=> $run_HoH{$b}->{'aic'} } keys %run_HoH) {
             $cumAICWeight += $run_HoH{$model}->{'aic_weight'};
             printf $OUT "\n%s\t%g\t%.4f\t%.4f\t%.4f\t%.4f", $run_HoH{$model}->{'name'}, $run_HoH{$model}->{$df}, $run_HoH{$model}->{'lnl'}, $run_HoH{$model}->{'aic'}, $run_HoH{$model}->{'aic_weight'}, $cumAICWeight;
-		}
+        }
 
-		print  $OUT "\n\n";
+        print  $OUT "\n\n";
 
         ## Output sorted by BIC
-		my $cumBICWeight = 0.0;
-		printf  $OUT "\n\n(Output sorted by BIC. w: Akaike weight, cw: cumulative w.)";
-		printf  $OUT "\n\nModel\tdf\tlnL\tBIC\twBIC\tcwBIC";
+        my $cumBICWeight = 0.0;
+        printf  $OUT "\n\n(Output sorted by BIC. w: Akaike weight, cw: cumulative w.)";
+        printf  $OUT "\n\nModel\tdf\tlnL\tBIC\twBIC\tcwBIC";
         foreach my $model (sort { $run_HoH{$a}->{'bic'} <=> $run_HoH{$b}->{'bic'} } keys %run_HoH) {
             $cumBICWeight += $run_HoH{$model}->{'bic_weight'};
             printf $OUT "\n%s\t%g\t%.4f\t%.4f\t%.4f\t%.4f", $run_HoH{$model}->{'name'}, $run_HoH{$model}->{$df}, $run_HoH{$model}->{'lnl'}, $run_HoH{$model}->{'bic'}, $run_HoH{$model}->{'bic_weight'}, $cumBICWeight;
-		}
-		print  $OUT "\n\n";
+        }
+        print  $OUT "\n\n";
         
         ## Check if the best models are among the MrBayes models
         #
@@ -1543,22 +1586,22 @@ sub pmraic_print {
         }
 
         #}
-		print  $OUT "\n\n";
-		print  $OUT "-------------------------------------------------------------\n";
-		print  $OUT "End of Output\n\n";
+        print  $OUT "\n\n";
+        print  $OUT "-------------------------------------------------------------\n";
+        print  $OUT "End of Output\n\n";
 
-	close($OUT);
+    close($OUT);
 
     ## Print trees to treefiles
-	open (AICTREE, ">$infile.AIC-$minimumAICmodel.tre") or die "\a\nERROR!\n\nCould not create tree file $!\n";
-		print  AICTREE  $run_HoH{$minimumAICmodel}->{'tree'}, "\n";
-	close(AICTREE);
-	open (AICcTREE, ">$infile.AICc-$minimumAICcmodel.tre") or die "\a\nERROR!\n\nCould not create tree file $!\n";
-		print  AICcTREE $run_HoH{$minimumAICcmodel}->{'tree'}, "\n";
-	close(AICcTREE);
-	open (BICTREE, ">$infile.BIC-$minimumBICmodel.tre") or die "\a\nERROR!\n\nCould not create tree file $!\n";
-		print  BICTREE $run_HoH{$minimumBICmodel}->{'tree'}, "\n";
-	close(BICTREE);
+    open (AICTREE, ">$infile.AIC-$minimumAICmodel.tre") or die "\a\nERROR!\n\nCould not create tree file $!\n";
+        print AICTREE $run_HoH{$minimumAICmodel}->{'tree'}, "\n";
+    close(AICTREE);
+    open (AICcTREE, ">$infile.AICc-$minimumAICcmodel.tre") or die "\a\nERROR!\n\nCould not create tree file $!\n";
+        print AICcTREE $run_HoH{$minimumAICcmodel}->{'tree'}, "\n";
+    close(AICcTREE);
+    open (BICTREE, ">$infile.BIC-$minimumBICmodel.tre") or die "\a\nERROR!\n\nCould not create tree file $!\n";
+        print BICTREE $run_HoH{$minimumBICmodel}->{'tree'}, "\n";
+    close(BICTREE);
 
 
 } # end of pmraic_print
@@ -1688,6 +1731,7 @@ sub run_fork_phyml {
         copy($infile, $model_infile) or die "File cannot be copied.";
 
         ## Run PHYML
+        print STDERR " model $hash_ref->{$model}->{'name'}\n" if $verbose;
         system("$phyml_bin --input $model_infile --datatype $datatype $sequential --model $hash_ref->{$model}->{'phymlcmd'} --search $search -o $optimize > /dev/null ");
 
 
@@ -1709,21 +1753,41 @@ sub run_fork_phyml {
 } # end of run_fork_phyml
 
 
-
-
 #===  FUNCTION  ================================================================
 #         NAME:  summarize_files 
-#      VERSION:  08/30/2011 09:43:33 PM CEST
+#      VERSION:  08/21/2015 01:36:31 PM
 #  DESCRIPTION:  summarize info in files
 #   PARAMETERS:  ???
 #      RETURNS:  ???
-#         TODO:  ???
+#         TODO:  BUG: run_HoH is not initialized correclty if running script using --summarize
+#                Need to set model name, df, and nbranches, before calling pmraic_print
+#                First, make sure initialize_HoH is called, then iterate over all files to be summarized, and:
+#                @models = check_models_arg(@$models);
+#                @run_HoH{@models} = @HoH{@models}; # hash slice to create %run_HoH from a subset of %HoH
 #===============================================================================
 sub summarize_files {
 
-
     my $glob_expression = $output_file_prefix . "*";
     my (@model_files) = glob($glob_expression);
+    
+#    print "####### run_HoH 0: #################\n\n";
+#    print Dumper(%run_HoH) and getc();
+
+    ## Check model names in model_files, and initialze %run_HoH
+    my %found_hash = (); #key: model, value:1
+    foreach my $file (@model_files) {
+        my (@arr) = split /\./, $file;
+        my $mod = $arr[1];
+        $found_hash{$mod}++;
+    }
+    my (@found_models) = keys (%found_hash);
+    my @models = check_models_arg(@found_models);
+
+    @run_HoH{@models} = @HoH{@models}; # hash slice to create %run_HoH from a subset of %HoH
+
+    print "####### run_HoH 1: #################\n\n";
+    print Dumper(%run_HoH) and getc();
+
 
     if ($verbose) {
         print STDERR "Summarizing output\n";
@@ -1731,7 +1795,7 @@ sub summarize_files {
         foreach my $file (@model_files) {
             print STDERR $file, "\n";
         }
-        warn "\n\nWill summarize the files above (hit Ctrl+c to quit or return to continue)\n" and getc();
+        warn "\n\nWill summarize the files above, hit return to continue (or Ctrl+c to quit).\nNote: to avoid interactive use, try the --noverbose flag.\n" and getc();
     }
 
     ## Get likelihood values and trees
@@ -1767,13 +1831,13 @@ sub summarize_files {
         $run_HoH{$model}->{'bic'}  = calculate_bic($model);
     }
 
-    
     ## Calculate AIC-, AICc-, BIC- weights
     calculate_aic_weights();
     calculate_aicc_weights();
     calculate_bic_weights();
 
     print Dumper(%run_HoH) if $debug;
+     print Dumper(%run_HoH);warn "\n(run_HoH) (hit return to continue)\n" and getc(); 
    
     pmraic_print();
 
@@ -1800,22 +1864,22 @@ if (@ARGV < 1) {
 }
 else {
     my $gopts = GetOptions (
-                "help"         => sub { pod2usage(1); },
-                "version"      => sub { print STDOUT "\n $0 version $VERSION\n  Last changes $CHANGES\n"; exit(0) },
-                "man"          => sub { pod2usage(-exitstatus => 0, -verbose => 2); },
-                "cpu=i"         => \$cpu,
-                "infile=s"      => \$infile,
-                "verbose!"      => \$verbose,
-                "outfile=s"     => \$outfile,
-                "phyml=s"       => \$phyml,
-                "search=s"      => \$search,
-                "optimize=s"    => \$optimize,
-                "summarize"     => \$summarize,
-                "nosummarize"   => \$nosummarize,
-                "bash=i"        => \$bash,
-                "maui"          => \$maui,
-                "modeltest"     => \$modeltest,
-                "models=s@"     => \$models,
+        "help"         => sub { pod2usage(1); },
+        "version"      => sub { print STDOUT "\n $0 version $VERSION\n  Last changes $CHANGES\n"; exit(0) },
+        "man"          => sub { pod2usage(-exitstatus => 0, -verbose => 2); },
+        "cpu=i"         => \$cpu,
+        "infile=s"      => \$infile,
+        "verbose!"      => \$verbose,
+        "outfile=s"     => \$outfile,
+        "phyml=s"       => \$phyml,
+        "search=s"      => \$search,
+        "optimize=s"    => \$optimize,
+        "summarize"     => \$summarize,
+        "nosummarize"   => \$nosummarize,
+        "bash=i"        => \$bash,
+        "maui"          => \$maui,
+        "modeltest"     => \$modeltest,
+        "models=s@"     => \$models,
     );
     die "wrong argument(s)?\n" unless ($gopts);
 }
@@ -1850,7 +1914,7 @@ $optimize = check_optimize_arg($optimize); # check correct syntax and lower case
 $search = check_search_arg($search); # check correct syntax and upper case.
 
 ## Initilalize some hashes
-initialize_HoH(); # Initializes all 56 models
+initialize_HoH(); # Initialize all 56 models
 
 ## Run a subset of the models?
 if ($models) { # --model=x,x,x
@@ -1866,7 +1930,6 @@ else {
     @run_HoH{@mrmodeltest_models} = @HoH{@mrmodeltest_models}; # hash slice to create %run_HoH from a subset of %HoH
     $n_models = scalar keys %run_HoH;
 }
-
 
 ## CPUs
 if ($cpu) {
@@ -1896,9 +1959,7 @@ else {
     else {
         $cpu = $MAX_PROCESSES;
     }
-
 }
-
 
 RUNNING:
 #Get the date
@@ -1938,7 +1999,7 @@ else {
     ## Run forked phyml
     print STDERR "Running $cpu instances of phyml.\n" if $verbose;
     if ($verbose) {
-        warn "Do Ctrl+c to quit now or hit return to start!\n" and getc();
+        warn "Hit return to start (or Ctrl+c to quit. Note: to avoid interactive use, try the --noverbose flag.)!\n" and getc();
         print STDERR "running...\n";
     }
 
@@ -1955,11 +2016,8 @@ else {
 print Dumper(%run_HoH) if $debug;
 print STDERR "Done with $0\n" if $verbose;
 
-
+## Exit
 exit(0);
-
-
-
 
 
 #===  POD DOCUMENTATION  =======================================================
